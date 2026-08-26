@@ -1,0 +1,13 @@
+{
+  "name": "workpods-buzz-ai-agents-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "python3 -m unittest discover -s agents/orchestrator-acp/tests -p 'test_*.py' && python3 -m unittest discover -s adapters/codex-acp/tests -p 'test_*.py' && python3 -m unittest discover -s adapters/pi-acp/tests -p 'test_*.py' && node --test agents/orchestrator-acp/tests/test_publish_agent_profile.mjs"
+  },
+  "dependencies": {
+    "nostr-tools": "^2.16.2",
+    "ws": "^8.18.3"
+  }
+}

@@ -1,0 +1,15 @@
+node_modules/
+/runtime/
+bin/buzz-acp-linux
+.DS_Store
+*.pyc
+__pycache__/
+.pytest_cache/
+.env
+*.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal

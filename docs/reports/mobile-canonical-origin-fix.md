@@ -39,5 +39,31 @@ requests failed before credentials could be imported.
 - Persistent container identities were unchanged, and the intentionally
   stopped Pi WebSocket service remained stopped.
 
+## Pairing Outcome
+
+- Buzz Desktop transferred the existing `learning-user` identity through the
+  encrypted QR and matching-code pairing flow.
+- Buzz Mobile opened the existing `AI Engineering Lab` community and channel;
+  it did not create a second identity or community.
+- A message sent from the tailnet-connected iPhone reached the relay, triggered
+  the configured agents, and produced the expected response in the shared
+  channel.
+- The relay retained the mobile-authored message and agent replies as ordinary
+  channel history, so both clients consume the same event stream.
+
+## Desktop Synchronization Lesson
+
+Desktop initially did not render the mobile-authored events even though the
+relay stored them and its channel cache observed the latest activity. The
+Desktop process had remained alive across the canonical relay URL migration,
+leaving its in-memory timeline subscription stale.
+
+A graceful **Command-Q** followed by relaunch created a fresh TLS connection,
+reissued successful history queries, and restored the shared timeline. No
+community deletion, local-storage clearing, or second pairing was required.
+This distinguishes transport and persistence health from client subscription
+state during troubleshooting.
+
 No private keys, identity files, authentication data, runtime database data,
-or pairing payloads are included in this report.
+pairing payloads, verification codes, or personal message content are included
+in this report.

@@ -134,6 +134,21 @@ and confirm that the six-digit verification code matches on both devices. The
 `/pair` route sends encrypted pairing events to the dedicated pairing relay;
 the main `/` route continues to serve the Buzz community.
 
+### Verified Cross-Device Flow
+
+The lab was verified with the existing `learning-user` identity paired from
+Buzz Desktop to Buzz Mobile. From the tailnet-connected iPhone, the user opened
+`AI Engineering Lab`, sent a message, and received the coordinated agent
+response through the same community used by Desktop. No second identity or
+duplicate community was created.
+
+If Desktop was already running while its community URL changed from the local
+relay to the Tailscale relay, fully quit it with **Command-Q** and relaunch it.
+Closing the window alone leaves the macOS process and its in-memory channel
+subscription running. A clean relaunch rebuilds the subscription and loads the
+mobile-authored messages from relay history; clearing storage or pairing again
+is unnecessary.
+
 A raw Tailscale `100.x` IP is useful for diagnostics, but the MagicDNS hostname
 is the supported community address because its HTTPS/WSS certificate and
 `/pair` route work together. The host must remain awake and online with

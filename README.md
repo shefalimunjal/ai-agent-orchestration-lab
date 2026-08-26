@@ -78,11 +78,19 @@ Tailscale can make the local Buzz community available to a phone without
 publishing the relay to the internet. Install Tailscale on the host and phone,
 sign both into the same tailnet, and keep Tailscale Funnel disabled.
 
-Set the pairing URL in `runtime/buzz.env` using the host's MagicDNS name:
+Use the host's MagicDNS name as one canonical origin in `runtime/buzz.env`:
 
 ```dotenv
+RELAY_URL=wss://your-machine.your-tailnet.ts.net
+BUZZ_PUBLIC_WS_URL=wss://your-machine.your-tailnet.ts.net
+BUZZ_PUBLIC_HTTP_URL=https://your-machine.your-tailnet.ts.net
+BUZZ_PUBLIC_HOST=your-machine.your-tailnet.ts.net
 BUZZ_PAIRING_RELAY_URL=wss://your-machine.your-tailnet.ts.net/pair
 ```
+
+Pass that file when starting every Compose group so the ACP agents inherit the
+same secure relay URL. Hermes and the older Pi bridge use the HTTPS form in
+their service-specific env files; the examples already show that form.
 
 Start the Buzz stack, then privately proxy the loopback-only community proxy:
 
@@ -108,6 +116,18 @@ This distinction matters: Desktop connects with `wss://`, then exports the
 same community to Mobile as an `https://` base URL. A Desktop community still
 using a local `ws://` address produces a credential payload that release
 mobile builds correctly reject.
+
+For an existing community originally created as `buzz.localtest.me:3300`,
+preserve its community UUID and migrate only its `communities.host` value to
+`your-machine.your-tailnet.ts.net`. Verify the selected row before updating
+it. Do not create a second community: channel membership and history are tied
+to the existing UUID.
+
+This host migration is required by NIP-98. A request made through WSS signs
+its HTTP endpoint as `https://your-machine.your-tailnet.ts.net/query`; Buzz
+rejects it if the relay configuration, proxy `Host`, or community row still
+expects `http://buzz.localtest.me:3300/query`. Changing only the Desktop relay
+URL therefore causes a correct `401 Unauthorized` URL-mismatch response.
 
 Next, open **Settings > Mobile > Start pairing**, scan the QR in Buzz Mobile,
 and confirm that the six-digit verification code matches on both devices. The

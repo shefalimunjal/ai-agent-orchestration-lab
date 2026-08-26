@@ -14,8 +14,9 @@ services:
       HERMES_HOME: /opt/data
       HOME: /opt/data/home
       CODEX_HOME: /opt/data/home/.codex
-      BUZZ_UPLOAD_URL: http://buzz.localtest.me:3300/upload
-      BUZZ_UPLOAD_HOST: buzz.localtest.me:3300
+      BUZZ_RELAY_URL: ${BUZZ_PUBLIC_HTTP_URL:-http://buzz.localtest.me:3300}
+      BUZZ_UPLOAD_URL: ${BUZZ_PUBLIC_HTTP_URL:-http://buzz.localtest.me:3300}/upload
+      BUZZ_UPLOAD_HOST: ${BUZZ_PUBLIC_HOST:-buzz.localtest.me:3300}
     extra_hosts:
       - "buzz.localtest.me:172.18.0.8"
     volumes:

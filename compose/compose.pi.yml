@@ -39,6 +39,8 @@ services:
         condition: service_healthy
     env_file:
       - ../runtime/pi/secrets/pi-bridge.env
+    environment:
+      BUZZ_RELAY_URL: ${BUZZ_PUBLIC_HTTP_URL:-http://buzz.localtest.me:3300}
     volumes:
       - ../bridges/pi/bridge:/bridge:ro
       - ../runtime/pi/state:/state

@@ -8,7 +8,7 @@ services:
     env_file:
       - ../runtime/pi-acp/pi-chat-acp.env
     environment:
-      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_RELAY_URL: ${BUZZ_PUBLIC_WS_URL:-ws://buzz.localtest.me:3300}
       BUZZ_ACP_AGENT_COMMAND: python3
       BUZZ_ACP_AGENT_ARGS: /usr/local/bin/pi-acp
       BUZZ_ACP_CHANNELS: ${PI_CHAT_CHANNEL_ID}
@@ -51,7 +51,7 @@ services:
     env_file:
       - ../runtime/pi-acp/pi-chat-acp.env
     environment:
-      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_RELAY_URL: ${BUZZ_PUBLIC_WS_URL:-ws://buzz.localtest.me:3300}
       BUZZ_ACP_RESPOND_TO_ALLOWLIST: ${HUMAN_PUBKEY},${ORCHESTRATOR_CHAT_PUBKEY}
       BUZZ_ACP_SYSTEM_PROMPT: >-
         You are pi-chat, a conversational Pi agent in the local Buzz learning

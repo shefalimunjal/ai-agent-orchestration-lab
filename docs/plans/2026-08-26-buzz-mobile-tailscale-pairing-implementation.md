@@ -8,6 +8,15 @@
 
 **Tech Stack:** Tailscale Serve and MagicDNS, Docker Compose, Nginx WebSocket reverse proxying, Buzz relay and pairing relay, NIP-11, NIP-AB, Node.js `ws`, Flutter Buzz Mobile.
 
+> **Canonical-origin correction:** Live pairing exposed an additional NIP-98
+> requirement not captured in the initial proxy-only plan. The relay URL,
+> forwarded `Host`, existing community host, Desktop URL, and agent URLs must
+> all represent the same Tailscale origin. The approved correction preserves
+> the existing community UUID and persistent data, then recreates only the
+> relay/proxy and affected conversational clients. It supersedes instructions
+> below that say to retain the local host rewrite or preserve agent container
+> IDs across this endpoint migration.
+
 ## Global Constraints
 
 - The phone must reuse the existing `learning-user` Buzz identity.

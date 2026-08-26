@@ -51,9 +51,29 @@ will advertise the routable, tailnet-only `/pair` WebSocket URL.
    proxy and forward it to the pairing container on port 5000.
 2. Configure the Buzz relay to advertise
    `wss://m-dy0xcqpqvv.tail6733e0.ts.net/pair` as its pairing relay URL.
-3. Recreate only the community proxy and Buzz relay containers required to
-   load the new configuration.
-4. Keep Tailscale Serve pointed at the loopback-only community proxy.
+3. Make the Tailscale hostname the canonical relay origin in the relay,
+   reverse proxy, existing community row, Desktop, Hermes, Pi, Codex, and the
+   orchestrator. WSS clients use `wss://`; signed HTTP API clients use the
+   corresponding `https://` origin.
+4. Preserve the existing community UUID, channels, memberships, messages,
+   identities, and persistent service volumes during the host migration.
+5. Recreate the community proxy, Buzz relay, and only the conversational
+   clients that need the new endpoint. Keep databases and runner state intact.
+6. Keep Tailscale Serve pointed at the loopback-only community proxy.
+
+## Canonical Origin and NIP-98
+
+Buzz verifies NIP-98 requests against an exact URL assembled from the relay
+scheme, the community host, and the API path. The externally signed URL and
+the relay's expected URL must therefore match byte-for-byte. For this design,
+the WebSocket origin `wss://<machine>.<tailnet>.ts.net` maps to the HTTP API
+origin `https://<machine>.<tailnet>.ts.net`.
+
+Changing only Buzz Desktop is insufficient. If Nginx rewrites `Host` to
+`buzz.localtest.me:3300` or the existing community row retains that local
+host, a signed `/query` request correctly fails with `401 Unauthorized` and a
+NIP-98 URL mismatch. The reverse proxy must preserve the public host, and the
+existing community row must be migrated in place.
 
 ## Pairing Flow
 
@@ -99,10 +119,12 @@ The implementation is complete only when all of the following pass:
 3. Main `wss://` WebSocket handshake.
 4. `/pair` secure WebSocket handshake.
 5. NIP-11 advertises the exact tailnet-only `/pair` URL.
-6. Hermes, Pi, Codex, and the orchestrator containers remain running and can
-   reconnect after the relay restart.
-7. Desktop generates a QR containing the Tailscale pairing endpoint.
-8. The iPhone completes SAS confirmation and opens the existing Buzz
+6. A signed `/query` using the existing human identity succeeds through the
+   Tailscale HTTPS origin without a NIP-98 mismatch.
+7. Hermes, Pi, Codex, and the orchestrator reconnect through the canonical
+   Tailscale endpoint.
+8. Desktop generates a QR containing the Tailscale pairing endpoint.
+9. The iPhone completes SAS confirmation and opens the existing Buzz
    community as `learning-user`.
 
 ## Operational Constraint

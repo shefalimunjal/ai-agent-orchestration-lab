@@ -6,7 +6,7 @@ services:
     container_name: learning-orchestrator-chat-acp
     entrypoint: ["python3", "/usr/local/bin/orchestrator-entrypoint"]
     environment:
-      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_RELAY_URL: ${BUZZ_PUBLIC_WS_URL:-ws://buzz.localtest.me:3300}
       BUZZ_ACP_AGENT_COMMAND: python3
       BUZZ_ACP_AGENT_ARGS: /usr/local/bin/orchestrator-acp
       BUZZ_ACP_CHANNELS: ${AI_ENGINEERING_LAB_CHANNEL_ID}

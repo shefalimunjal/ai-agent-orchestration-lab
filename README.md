@@ -1,6 +1,6 @@
-# WorkPods Buzz AI Agents Lab
+# AI Agent Orchestration Lab
 
-Local-only lab for connecting three conversational agents to Buzz and coordinating them through an orchestrator:
+Portfolio project demonstrating a local multi-agent AI engineering system: three conversational agents coordinate through a message bus under one orchestrator agent.
 
 - `hermes-learning`: Hermes teaching agent for architecture and concepts.
 - `pi-chat`: Pi ACP conversational agent for workflow, harness, and runner boundaries.
@@ -36,11 +36,11 @@ The current setup is a learning coordinator. It asks the agents for analysis and
 
 ## Local Setup Notes
 
-This repo assumes the WorkPods repos live as siblings under the same parent directory:
+This lab was developed against the local WorkPods/Buzz source tree. By default, it assumes those repos live as siblings under the same parent directory:
 
 ```text
 AI-Labs/
-  workpods-buzz-ai-agents-lab/
+  ai-agent-orchestration-lab/
   workpods-umbrella/
   workpods-buzz/
   workpods-ingest/

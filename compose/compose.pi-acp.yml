@@ -1,0 +1,90 @@
+name: local-buzz-pi-acp
+
+services:
+  pi-chat-acp:
+    image: workpods/pi-runner:local
+    container_name: learning-pi-chat-acp
+    entrypoint: ["/usr/local/bin/buzz-acp"]
+    env_file:
+      - ../runtime/pi-acp/pi-chat-acp.env
+    environment:
+      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_ACP_AGENT_COMMAND: python3
+      BUZZ_ACP_AGENT_ARGS: /usr/local/bin/pi-acp
+      BUZZ_ACP_CHANNELS: ${PI_CHAT_CHANNEL_ID}
+      BUZZ_ACP_RESPOND_TO: allowlist
+      BUZZ_ACP_RESPOND_TO_ALLOWLIST: ${HUMAN_PUBKEY}
+      BUZZ_ACP_NO_BASE_PROMPT: "true"
+      BUZZ_ACP_NO_MEMORY: "true"
+      BUZZ_ACP_INITIAL_REPLAY_SECS: "600"
+      BUZZ_ACP_IDLE_TIMEOUT: "300"
+      BUZZ_ACP_MAX_TURN_DURATION: "900"
+      BUZZ_ACP_DISPLAY_NAME: pi-chat
+      BUZZ_ACP_SYSTEM_PROMPT: >-
+        You are pi-chat, a conversational Pi agent in the local Buzz learning
+        community. Be beginner-friendly. You are using provider openai-codex,
+        model gpt-5.5, thinking low, and tools read,grep,find,ls. The current
+        lab transport is Buzz -> buzz-acp websocket -> pi-acp -> Pi RPC for this
+        service. Keep replies concise unless the user asks for details.
+      PI_CODING_AGENT_DIR: /opt/pi/state/pi-agent
+      PI_ACP_DIRECT_PI: "1"
+      PI_ACP_DIRECT_BUZZ: "1"
+      PI_ACP_BUZZ_CLI: /buzz-bin/buzz
+      PI_ACP_PROVIDER: openai-codex
+      PI_ACP_MODEL: gpt-5.5
+      PI_ACP_THINKING: low
+      PI_ACP_TOOLS: read,grep,find,ls
+    volumes:
+      - ../bin/buzz-acp-linux:/usr/local/bin/buzz-acp:ro
+      - ../adapters/pi-acp/pi_acp_adapter.py:/usr/local/bin/pi-acp:ro
+      - ../runtime/pi/state:/opt/pi/state
+      - ${WORKPODS_BUZZ_DIR:-../../workpods-buzz}/hermes/buzz-bin:/buzz-bin:ro
+    networks:
+      workpods-learning:
+        aliases:
+          - pi-chat-acp
+
+  pi-chat-acp-poller:
+    image: workpods/pi-runner:local
+    container_name: learning-pi-chat-acp-poller
+    entrypoint: ["python3", "/usr/local/bin/pi-acp-poller"]
+    env_file:
+      - ../runtime/pi-acp/pi-chat-acp.env
+    environment:
+      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_ACP_RESPOND_TO_ALLOWLIST: ${HUMAN_PUBKEY},${ORCHESTRATOR_CHAT_PUBKEY}
+      BUZZ_ACP_SYSTEM_PROMPT: >-
+        You are pi-chat, a conversational Pi agent in the local Buzz learning
+        community. Be beginner-friendly. You are using provider openai-codex,
+        model gpt-5.5, thinking low, and tools read,grep,find,ls. The current
+        running lab transport is Buzz -> pi-chat ACP poll bridge -> pi-acp ->
+        Pi RPC. Keep replies concise unless the user asks for details.
+      PI_ACP_TRANSPORT_DESCRIPTION: Buzz -> pi-chat ACP poll bridge -> pi-acp -> Pi RPC -> Codex/OpenAI provider -> Buzz
+      PI_CHAT_CHANNEL_ID: ${PI_CHAT_CHANNEL_ID}
+      PI_CHAT_CHANNELS: ${PI_CHAT_CHANNEL_ID},${AI_ENGINEERING_LAB_CHANNEL_ID}
+      PI_CHAT_CHANNEL_NAME: Pi Chat
+      PI_CHAT_PUBKEY: ${PI_CHAT_PUBKEY}
+      PI_CODING_AGENT_DIR: /opt/pi/state/pi-agent
+      PI_ACP_DIRECT_PI: "1"
+      PI_ACP_DIRECT_BUZZ: "1"
+      PI_ACP_BUZZ_CLI: /buzz-bin/buzz
+      PI_ACP_PROVIDER: openai-codex
+      PI_ACP_MODEL: gpt-5.5
+      PI_ACP_THINKING: low
+      PI_ACP_TOOLS: read,grep,find,ls
+      PI_ACP_POLL_INTERVAL_SECS: "4"
+      PI_ACP_POLL_REPLAY_SECS: "600"
+      PI_ACP_POLL_LIMIT: "30"
+    volumes:
+      - ../adapters/pi-acp/pi_acp_adapter.py:/usr/local/bin/pi-acp:ro
+      - ../adapters/pi-acp/pi_acp_poll_bridge.py:/usr/local/bin/pi-acp-poller:ro
+      - ../runtime/pi/state:/opt/pi/state
+      - ${WORKPODS_BUZZ_DIR:-../../workpods-buzz}/hermes/buzz-bin:/buzz-bin:ro
+    networks:
+      workpods-learning:
+        aliases:
+          - pi-chat-acp-poller
+
+networks:
+  workpods-learning:
+    external: true

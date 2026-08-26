@@ -1,0 +1,55 @@
+name: local-buzz-orchestrator-acp
+
+services:
+  orchestrator-chat-acp:
+    image: workpods/pi-runner:local
+    container_name: learning-orchestrator-chat-acp
+    entrypoint: ["python3", "/usr/local/bin/orchestrator-entrypoint"]
+    environment:
+      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_ACP_AGENT_COMMAND: python3
+      BUZZ_ACP_AGENT_ARGS: /usr/local/bin/orchestrator-acp
+      BUZZ_ACP_CHANNELS: ${AI_ENGINEERING_LAB_CHANNEL_ID}
+      BUZZ_ACP_RESPOND_TO: allowlist
+      BUZZ_ACP_RESPOND_TO_ALLOWLIST: ${HUMAN_PUBKEY}
+      BUZZ_ACP_NO_BASE_PROMPT: "true"
+      BUZZ_ACP_NO_MEMORY: "true"
+      BUZZ_ACP_INITIAL_REPLAY_SECS: "60"
+      BUZZ_ACP_IDLE_TIMEOUT: "300"
+      BUZZ_ACP_MAX_TURN_DURATION: "420"
+      BUZZ_ACP_DISPLAY_NAME: orchestrator-chat
+      ORCHESTRATOR_IDENTITY_FILE: /run/identity/orchestrator-chat.json
+      ORCHESTRATOR_CHANNEL_ID: ${AI_ENGINEERING_LAB_CHANNEL_ID}
+      ORCHESTRATOR_HUMAN_PUBKEY: ${HUMAN_PUBKEY}
+      ORCHESTRATOR_HERMES_PUBKEY: ${HERMES_PUBKEY}
+      ORCHESTRATOR_PI_PUBKEY: ${PI_CHAT_PUBKEY}
+      ORCHESTRATOR_CODEX_PUBKEY: ${CODEX_CHAT_PUBKEY}
+      ORCHESTRATOR_RESPONSE_TIMEOUT_SECS: "90"
+      ORCHESTRATOR_POLL_INTERVAL_SECS: "3"
+      ORCHESTRATOR_BUZZ_CLI: /buzz-bin/buzz
+      ORCHESTRATOR_CODEX_MODEL: gpt-5.5
+      ORCHESTRATOR_CODEX_SANDBOX: read-only
+      ORCHESTRATOR_CODEX_WORKDIR: /workspace
+      ORCHESTRATOR_CODEX_STATE_DIR: /opt/orchestrator-state/codex-acp
+      ORCHESTRATOR_CODEX_TIMEOUT_SECS: "300"
+      CODEX_HOME: /opt/codex-home
+      HOME: /tmp/orchestrator-home
+      PYTHONPATH: /opt/orchestrator-acp
+    volumes:
+      - ../bin/buzz-acp-linux:/usr/local/bin/buzz-acp:ro
+      - ../agents/orchestrator-acp:/opt/orchestrator-acp:ro
+      - ../agents/orchestrator-acp/orchestrator_entrypoint.py:/usr/local/bin/orchestrator-entrypoint:ro
+      - ../agents/orchestrator-acp/orchestrator_acp_adapter.py:/usr/local/bin/orchestrator-acp:ro
+      - ../runtime/identities/orchestrator-chat.json:/run/identity/orchestrator-chat.json:ro
+      - ../runtime/orchestrator/state/codex-home:/opt/codex-home
+      - ../runtime/orchestrator/state:/opt/orchestrator-state
+      - ${WORKPODS_WORKSPACE_DIR:-../../workpods-umbrella}:/workspace:ro
+      - ${WORKPODS_BUZZ_DIR:-../../workpods-buzz}/hermes/buzz-bin:/buzz-bin:ro
+    networks:
+      workpods-learning:
+        aliases:
+          - orchestrator-chat-acp
+
+networks:
+  workpods-learning:
+    external: true

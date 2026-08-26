@@ -1,0 +1,52 @@
+name: local-buzz-codex-acp
+
+services:
+  codex-chat-acp:
+    image: workpods/pi-runner:local
+    container_name: learning-codex-chat-acp
+    entrypoint: ["/usr/local/bin/buzz-acp"]
+    env_file:
+      - ../runtime/codex-acp/codex-chat-acp.env
+    environment:
+      BUZZ_RELAY_URL: ws://buzz.localtest.me:3300
+      BUZZ_ACP_AGENT_COMMAND: python3
+      BUZZ_ACP_AGENT_ARGS: /usr/local/bin/codex-acp
+      BUZZ_ACP_CHANNELS: ${CODEX_CHAT_CHANNEL_ID},${AI_ENGINEERING_LAB_CHANNEL_ID}
+      BUZZ_ACP_RESPOND_TO: allowlist
+      BUZZ_ACP_RESPOND_TO_ALLOWLIST: ${HUMAN_PUBKEY},${ORCHESTRATOR_CHAT_PUBKEY}
+      BUZZ_ACP_NO_BASE_PROMPT: "true"
+      BUZZ_ACP_NO_MEMORY: "true"
+      BUZZ_ACP_INITIAL_REPLAY_SECS: "600"
+      BUZZ_ACP_IDLE_TIMEOUT: "300"
+      BUZZ_ACP_MAX_TURN_DURATION: "900"
+      BUZZ_ACP_DISPLAY_NAME: codex-chat
+      BUZZ_ACP_SYSTEM_PROMPT: >-
+        You are codex-chat, a conversational Codex agent in the local Buzz
+        learning community. You are connected through buzz-acp to a local
+        codex-acp shim, which invokes Codex CLI with the signed-in Codex
+        subscription. Keep replies concise unless the user asks for details.
+      CODEX_HOME: /opt/codex-home
+      HOME: /tmp/codex-home
+      CODEX_ACP_MODEL: gpt-5.5
+      CODEX_ACP_SANDBOX: read-only
+      CODEX_ACP_WORKDIR: /workspace
+      CODEX_ACP_STATE_DIR: /opt/codex-state/codex-acp
+      CODEX_ACP_BUZZ_CLI: /buzz-bin/buzz
+      CODEX_ACP_ORCHESTRATOR_PUBKEY: ${ORCHESTRATOR_CHAT_PUBKEY}
+      CODEX_ACP_TRANSPORT_DESCRIPTION: Buzz -> buzz-acp -> codex-acp -> codex exec -> Codex/OpenAI provider -> Buzz
+      CODEX_ACP_TIMEOUT_SECS: "900"
+    volumes:
+      - ../bin/buzz-acp-linux:/usr/local/bin/buzz-acp:ro
+      - ../adapters/codex-acp/codex_acp_adapter.py:/usr/local/bin/codex-acp:ro
+      - ../runtime/codex/state/codex-home:/opt/codex-home
+      - ../runtime/codex/state:/opt/codex-state
+      - ${WORKPODS_WORKSPACE_DIR:-../../workpods-umbrella}:/workspace:ro
+      - ${WORKPODS_BUZZ_DIR:-../../workpods-buzz}/hermes/buzz-bin:/buzz-bin:ro
+    networks:
+      workpods-learning:
+        aliases:
+          - codex-chat-acp
+
+networks:
+  workpods-learning:
+    external: true

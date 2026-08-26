@@ -1,0 +1,30 @@
+name: workpods-learning-hermes
+
+services:
+  hermes-learning:
+    image: workpods/hermes-codex:local
+    build:
+      context: ${WORKPODS_BUZZ_DIR:-../../workpods-buzz}/hermes
+      dockerfile: Dockerfile.hermes-codex
+    container_name: learning-hermes
+    command: ["gateway", "run"]
+    env_file:
+      - ../runtime/hermes/secrets/hermes-learning.env
+    environment:
+      HERMES_HOME: /opt/data
+      HOME: /opt/data/home
+      CODEX_HOME: /opt/data/home/.codex
+      BUZZ_UPLOAD_URL: http://buzz.localtest.me:3300/upload
+      BUZZ_UPLOAD_HOST: buzz.localtest.me:3300
+    extra_hosts:
+      - "buzz.localtest.me:172.18.0.8"
+    volumes:
+      - ../runtime/hermes/agents/hermes-learning:/opt/data
+    restart: unless-stopped
+    networks:
+      - workpods-learning
+
+networks:
+  workpods-learning:
+    external: true
+    name: workpods-learning

@@ -97,10 +97,22 @@ Use this community URL in Buzz Mobile:
 https://your-machine.your-tailnet.ts.net
 ```
 
-In Buzz Desktop, open **Settings > Mobile > Start pairing**, scan the QR in
-Buzz Mobile, and confirm that the six-digit verification code matches on both
-devices. The `/pair` route sends encrypted pairing events to the dedicated
-pairing relay; the main `/` route continues to serve the Buzz community.
+Before generating the QR, update the active community's relay URL in Buzz
+Desktop to the secure WebSocket form:
+
+```text
+wss://your-machine.your-tailnet.ts.net
+```
+
+This distinction matters: Desktop connects with `wss://`, then exports the
+same community to Mobile as an `https://` base URL. A Desktop community still
+using a local `ws://` address produces a credential payload that release
+mobile builds correctly reject.
+
+Next, open **Settings > Mobile > Start pairing**, scan the QR in Buzz Mobile,
+and confirm that the six-digit verification code matches on both devices. The
+`/pair` route sends encrypted pairing events to the dedicated pairing relay;
+the main `/` route continues to serve the Buzz community.
 
 A raw Tailscale `100.x` IP is useful for diagnostics, but the MagicDNS hostname
 is the supported community address because its HTTPS/WSS certificate and

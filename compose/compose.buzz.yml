@@ -21,7 +21,7 @@ services:
       BUZZ_GIT_REPO_PATH: /data/git
       BUZZ_AUTO_MIGRATE: ${BUZZ_AUTO_MIGRATE:-true}
       BUZZ_GIT_CONFORMANCE_PROBE: "true"
-      BUZZ_PAIRING_RELAY_URL: ws://pairing:5000
+      BUZZ_PAIRING_RELAY_URL: ${BUZZ_PAIRING_RELAY_URL:-ws://pairing:5000}
       BUZZ_REQUIRE_RELAY_MEMBERSHIP: ${BUZZ_REQUIRE_RELAY_MEMBERSHIP:-true}
       RELAY_OWNER_PUBKEY: ${RELAY_OWNER_PUBKEY:?set RELAY_OWNER_PUBKEY}
       BUZZ_RELAY_PRIVATE_KEY: ${BUZZ_RELAY_PRIVATE_KEY:?set BUZZ_RELAY_PRIVATE_KEY}
@@ -58,6 +58,8 @@ services:
   community-proxy:
     image: nginx:1.27-alpine
     container_name: learning-buzz-community-proxy
+    ports:
+      - "127.0.0.1:3330:3300"
     volumes:
       - ./buzz-community-proxy.conf:/etc/nginx/nginx.conf:ro
     depends_on:

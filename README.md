@@ -72,6 +72,41 @@ You also need:
 - `runtime/identities/*.json` generated locally.
 - Codex auth JSON copied locally into the ignored runtime Codex homes when using Codex as the provider.
 
+## Private Mobile Access With Tailscale
+
+Tailscale can make the local Buzz community available to a phone without
+publishing the relay to the internet. Install Tailscale on the host and phone,
+sign both into the same tailnet, and keep Tailscale Funnel disabled.
+
+Set the pairing URL in `runtime/buzz.env` using the host's MagicDNS name:
+
+```dotenv
+BUZZ_PAIRING_RELAY_URL=wss://your-machine.your-tailnet.ts.net/pair
+```
+
+Start the Buzz stack, then privately proxy the loopback-only community proxy:
+
+```bash
+tailscale serve --bg 3330
+tailscale serve status
+```
+
+Use this community URL in Buzz Mobile:
+
+```text
+https://your-machine.your-tailnet.ts.net
+```
+
+In Buzz Desktop, open **Settings > Mobile > Start pairing**, scan the QR in
+Buzz Mobile, and confirm that the six-digit verification code matches on both
+devices. The `/pair` route sends encrypted pairing events to the dedicated
+pairing relay; the main `/` route continues to serve the Buzz community.
+
+A raw Tailscale `100.x` IP is useful for diagnostics, but the MagicDNS hostname
+is the supported community address because its HTTPS/WSS certificate and
+`/pair` route work together. The host must remain awake and online with
+Tailscale, Docker, Buzz, and the agents running.
+
 ## Testing
 
 Install Node dependencies and run the adapter/controller tests:

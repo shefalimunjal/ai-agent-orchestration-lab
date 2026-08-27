@@ -189,6 +189,23 @@ IMPORTANT: This is a new top-level message.
         self.assertEqual(calls[0][0], ["/buzz-bin/buzz", "messages", "get", "--channel", "channel", "--limit", "100"])
         self.assertEqual(calls[0][1]["timeout"], 1.25)
 
+    def test_orchestrate_uses_configured_buzz_cli(self):
+        configured = "/Applications/BuzzLab/bin/buzz"
+        client = mock.Mock()
+        with mock.patch.dict(os.environ, {"ORCHESTRATOR_BUZZ_CLI": configured}), mock.patch.object(
+            adapter, "BuzzClient", return_value=client
+        ) as client_type, mock.patch.object(adapter, "load_workers_from_env", return_value=[]), mock.patch.object(
+            adapter, "collect_contributions", return_value=([], [])
+        ):
+            client.send.return_value = "d" * 64
+            adapter.orchestrate(
+                "Channel: AI Engineering Lab (#11111111-2222-3333-4444-555555555555)\n"
+                "Event ID: " + "a" * 64 + "\nContent: @orchestrator-chat health check",
+                "session",
+            )
+
+        client_type.assert_called_once_with(buzz_cli=configured)
+
     def test_collection_checks_deadline_before_fetch_and_caps_sleep(self):
         hermes = Worker("hermes", "hermes-learning", "a" * 64, "architecture", ())
         calls = []
@@ -253,12 +270,13 @@ IMPORTANT: This is a new top-level message.
                     "BUZZ_PRIVATE_KEY": "test-private-key", "BUZZ_RELAY_URL": "ws://relay",
                     "ORCHESTRATOR_IDENTITY_FILE": "/identity", "NOSTR_PRIVATE_KEY": "other-key",
                     "ORCHESTRATOR_CODEX_STATE_DIR": state_dir,
+                    "ORCHESTRATOR_CODEX_WORKDIR": "/configured-workspace",
                 },
             )
 
         self.assertEqual(answer, "last")
         command, kwargs = calls[0]
-        self.assertEqual(command[:12], ["codex", "exec", "--json", "--ignore-user-config", "--ignore-rules", "--model", "gpt-5.5", "--sandbox", "read-only", "-C", "/workspace", "--skip-git-repo-check"])
+        self.assertEqual(command[:12], ["codex", "exec", "--json", "--ignore-user-config", "--ignore-rules", "--model", "gpt-5.5", "--sandbox", "read-only", "-C", "/configured-workspace", "--skip-git-repo-check"])
         self.assertEqual(command[-1], "-")
         self.assertEqual(kwargs["env"]["PATH"], "/usr/bin")
         self.assertEqual(kwargs["env"]["CODEX_HOME"], "/codex-home")

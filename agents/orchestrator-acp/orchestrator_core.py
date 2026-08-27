@@ -17,6 +17,7 @@ class Worker:
 class Delegation:
     worker: Worker
     event_id: str
+    root_event_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -59,12 +60,15 @@ def build_worker_prompt(task: str, worker: Worker) -> str:
 
 
 def _is_reply_to(event: dict[str, Any], delegation: Delegation) -> bool:
+    accepted_parents = {delegation.event_id}
+    if delegation.root_event_id:
+        accepted_parents.add(delegation.root_event_id)
     for tag in event.get("tags", ()):
         if (
             isinstance(tag, (list, tuple))
             and len(tag) >= 4
             and tag[0] == "e"
-            and tag[1] == delegation.event_id
+            and tag[1] in accepted_parents
             and tag[3] == "reply"
         ):
             return True

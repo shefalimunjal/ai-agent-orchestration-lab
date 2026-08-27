@@ -370,9 +370,10 @@ def run_codex_synthesis(
     state_dir.mkdir(parents=True, exist_ok=True)
     output_file = state_dir / f"{session_id}-{int(time.time() * 1000)}.txt"
     timeout = min(max(int(values.get("ORCHESTRATOR_CODEX_TIMEOUT_SECS", "300")), 1), 300)
+    workdir = values.get("ORCHESTRATOR_CODEX_WORKDIR", "/workspace")
     command = [
         "codex", "exec", "--json", "--ignore-user-config", "--ignore-rules", "--model", "gpt-5.5",
-        "--sandbox", "read-only", "-C", "/workspace", "--skip-git-repo-check", "--output-last-message",
+        "--sandbox", "read-only", "-C", workdir, "--skip-git-repo-check", "--output-last-message",
         str(output_file), "-",
     ]
     completed = subprocess_run(
@@ -395,7 +396,9 @@ def orchestrate(prompt_text: str, session_id: str, *, buzz: BuzzClient | None = 
         raise RuntimeError("could not find root Buzz event id in ACP prompt")
     task = extract_human_task(prompt_text)
     workers = select_workers(task, load_workers_from_env())
-    client = buzz or BuzzClient()
+    client = buzz or BuzzClient(
+        buzz_cli=os.environ.get("ORCHESTRATOR_BUZZ_CLI", "/buzz-bin/buzz")
+    )
     client.send(routing.channel_id, "[TASK]\n" + task_summary(task, workers), reply_to=routing.reply_to)
     delegations = [
         Delegation(
@@ -406,6 +409,7 @@ def orchestrate(prompt_text: str, session_id: str, *, buzz: BuzzClient | None = 
                 reply_to=routing.reply_to,
                 mention=worker.pubkey,
             ),
+            routing.reply_to,
         )
         for worker in workers
     ]

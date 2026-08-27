@@ -59,6 +59,25 @@ class OrchestratorCoreTests(unittest.TestCase):
         contribution = find_contribution(events, delegation, not_before=100)
         self.assertEqual(contribution, Contribution("codex", "3" * 64, "usable answer"))
 
+    def test_contribution_accepts_worker_reply_flattened_to_unique_root(self):
+        delegation = Delegation(WORKERS[0], "d" * 64, "a" * 64)
+        events = [
+            {
+                "id": "1" * 64,
+                "pubkey": "a" * 64,
+                "created_at": 101,
+                "content": "flattened worker answer",
+                "tags": [["e", "a" * 64, "", "reply"]],
+            }
+        ]
+
+        contribution = find_contribution(events, delegation, not_before=100)
+
+        self.assertEqual(
+            contribution,
+            Contribution("hermes", "1" * 64, "flattened worker answer"),
+        )
+
     def test_synthesis_prompt_attributes_answers_and_names_timeouts(self):
         prompt = build_synthesis_prompt(
             "Explain ACP",
